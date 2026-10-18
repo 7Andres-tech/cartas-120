@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Ariana & Andrés · 210 Cartas</title>
+  <style>
+    :root {
+      --bg-dark: #09050e;
+      --bg-card: #160d24;
+      --primary: #ff1e73;
+      --secondary: #7928ca;
+      --accent: #ffb800;
+      --text-light: #ffffff;
+      --text-muted: #b5a8c9;
+      --cat-color: #00c2ff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background: radial-gradient(circle at top, #2d0b38 0%, #08040d 100%);
+      color: var(--text-light);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px 16px;
+      overflow-x: hidden;
+    }
+
+    header {
+      width: 100%;
+      max-width: 440px;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .logo {
+      font-size: 1.1rem;
+      font-weight: 900;
+      background: linear-gradient(90deg, #ff1e73, #ff8a00);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 0.4px;
+    }
+
+    .top-btns {
+      display: flex;
+      gap: 6px;
+    }
+
+    .icon-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      border-radius: 10px;
+      padding: 6px 9px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .icon-btn:active { transform: scale(0.93); }
+
+    .scoreboard {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .player-box {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 9px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      transition: 0.3s;
+    }
+
+    .player-box.active-turn {
+      border-color: var(--primary);
+      box-shadow: 0 0 16px rgba(255, 30, 115, 0.4);
+      background: rgba(255, 30, 115, 0.12);
+    }
+
+    .player-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 700;
+      font-size: 0.92rem;
+    }
+
+    .drink-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .drink-count {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--accent);
+    }
+
+    .mini-btns { display: flex; gap: 4px; }
+
+    .mini-btn {
+      background: rgba(255, 255, 255, 0.14);
+      border: none;
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .wildcard-badge {
+      font-size: 0.68rem;
+      padding: 2px 7px;
+      border-radius: 20px;
+      background: rgba(255, 184, 0, 0.2);
+      color: #ffd05b;
+      border: 1px solid rgba(255, 184, 0, 0.4);
+      cursor: pointer;
+    }
+
+    .wildcard-badge.used {
+      opacity: 0.35;
+      text-decoration: line-through;
+    }
+
+    .filter-bar {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+    }
+
+    .filter-bar::-webkit-scrollbar { display: none; }
+
+    .chip {
+      flex: 1;
+      text-align: center;
+      white-space: nowrap;
+      padding: 7px 10px;
+      border-radius: 20px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .chip.active {
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 0 12px rgba(255, 30, 115, 0.4);
+    }
+
+    .stage {
+      width: 100%;
+      max-width: 390px;
+      height: 390px;
+      perspective: 1200px;
+      margin: 4px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card-3d {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.65s cubic-bezier(0.23, 1, 0.32, 1);
+      cursor: pointer;
+    }
+
+    .card-3d.is-flipped { transform: rotateY(180deg); }
+
+    .card-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      border-radius: 26px;
+      padding: 22px 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.65);
+    }
+
+    .card-back {
+      background: linear-gradient(135deg, #2b0f3f 0%, #10061c 100%);
+      border: 2px solid rgba(255, 30, 115, 0.5);
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 14px;
+    }
+
+    .card-back-pattern {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,30,115,0.35) 0%, transparent 70%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      animation: pulse 2s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.09); }
+    }
+
+    .card-back h2 { font-size: 1.35rem; letter-spacing: 1px; }
+    .card-back p { font-size: 0.88rem; color: var(--text-muted); }
+
+    .card-front {
+      transform: rotateY(180deg);
+      background: linear-gradient(160deg, #211134 0%, #0e0718 100%);
+      border: 2px solid var(--cat-color);
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7), 0 0 25px color-mix(in srgb, var(--cat-color) 40%, transparent);
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .cat-pill {
+      font-size: 0.8rem;
+      font-weight: 800;
+      letter-spacing: 0.4px;
+      padding: 5px 14px;
+      border-radius: 20px;
+      background: color-mix(in srgb, var(--cat-color) 24%, transparent);
+      color: #fff;
+      border: 1px solid var(--cat-color);
+    }
+
+    .card-number {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .card-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      gap: 14px;
+      padding: 6px 2px;
+    }
+
+    .target-badge {
+      font-size: 0.88rem;
+      font-weight: 800;
+      padding: 5px 16px;
+      border-radius: 30px;
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--accent);
+    }
+
+    .card-text {
+      font-size: 1.15rem;
+      line-height: 1.45;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding-top: 10px;
+    }
+
+    .timer-btn {
+      background: rgba(255, 184, 0, 0.2);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 5px 12px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 0.78rem;
+      cursor: pointer;
+    }
+
+    .controls {
+      width: 100%;
+      max-width: 440px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .action-row {
+      display: grid;
+      grid-template-columns: 1fr 1.25fr;
+      gap: 10px;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 16px;
+      padding: 13px 14px;
+      font-size: 0.94rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: white;
+    }
+
+    .btn:active { transform: scale(0.96); }
+
+    .btn-drink {
+      background: rgba(255, 184, 0, 0.16);
+      border: 1px solid rgba(255, 184, 0, 0.5);
+      color: #ffd25a;
+    }
+
+    .btn-next {
+      background: linear-gradient(90deg, #ff1e73, #7928ca);
+      box-shadow: 0 8px 20px rgba(255, 30, 115, 0.38);
+    }
+
+    .btn-skip-level {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px dashed rgba(255, 42, 133, 0.55);
+      color: #ff9ec2;
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-size: 0.84rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .btn-skip-level:active { transform: scale(0.97); }
+
+    .progress-info {
+      text-align: center;
+      font-size: 0.74rem;
+      color: var(--text-muted);
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.84);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 100;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: #1a1029;
+      border: 1px solid rgba(255, 30, 115, 0.4);
+      border-radius: 22px;
+      max-width: 400px;
+      width: 100%;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      text-align: center;
+    }
+
+    .modal h3 { color: var(--primary); font-size: 1.25rem; }
+
+    .modal ul {
+      text-align: left;
+      padding-left: 18px;
+      font-size: 0.88rem;
+      line-height: 1.48;
+      color: #e2d9f3;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .punishment-box {
+      background: rgba(255, 30, 115, 0.12);
+      border: 1px dashed var(--primary);
+      border-radius: 16px;
+      padding: 16px;
+      font-size: 1.05rem;
+      line-height: 1.45;
+      color: #fff;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="top-bar">
+      <div class="logo">✨ Ariana & Andrés</div>
+      <div class="top-btns">
+        <button class="icon-btn" onclick="jumpToCard()">🔢 Ir a #</button>
+        <button class="icon-btn" onclick="openModal()">📜 Reglas</button>
+        <button class="icon-btn" onclick="resetGame()">🔄</button>
+      </div>
+    </div>
+
+    <div class="scoreboard">
+      <div class="player-box active-turn" id="box-Ariana">
+        <div class="player-header">
+          <span>👑 Ariana</span>
+          <span class="wildcard-badge" id="wc-Ariana" onclick="toggleWildcard('Ariana')">Comodín ★</span>
+        </div>
+        <div class="drink-controls">
+          <span>Tragos: <strong class="drink-count" id="drinks-Ariana">0</strong> 🥂</span>
+          <div class="mini-btns">
+            <button class="mini-btn" onclick="addDrink('Ariana', -1)">-</button>
+            <button class="mini-btn" onclick="addDrink('Ariana', 1)">+</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="player-box" id="box-Andrés">
+        <div class="player-header">
+          <span>🔥 Andrés</span>
+          <span class="wildcard-badge" id="wc-Andrés" onclick="toggleWildcard('Andrés')">Comodín ★</span>
+        </div>
+        <div class="drink-controls">
+          <span>Tragos: <strong class="drink-count" id="drinks-Andrés">0</strong> 🥃</span>
+          <div class="mini-btns">
+            <button class="mini-btn" onclick="addDrink('Andrés', -1)">-</button>
+            <button class="mini-btn" onclick="addDrink('Andrés', 1)">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-bar" id="filterBar">
+      <button class="chip active" id="chip-ALL" onclick="setFilter('ALL', this)">Todas</button>
+      <button class="chip" id="chip-1" onclick="setFilter(1, this)">Nivel 1 - 😆</button>
+      <button class="chip" id="chip-2" onclick="setFilter(2, this)">Nivel 2 - 🥵</button>
+      <button class="chip" id="chip-3" onclick="setFilter(3, this)">Nivel 3 - 😈🔥</button>
+    </div>
+  </header>
+
+  <main class="stage">
+    <div class="card-3d" id="cardElement" onclick="handleCardTap()">
+      <!-- DORSO -->
+      <div class="card-face card-back">
+        <div class="card-back-pattern">🎴</div>
+        <h2>TOCA PARA EMPEZAR</h2>
+        <p id="nextTurnHint">Ariana & Andrés · 3 Niveles</p>
+      </div>
+
+      <!-- FRENTE -->
+      <div class="card-face card-front" id="cardFront">
+        <div class="card-top">
+          <span class="cat-pill" id="catName">Nivel 1 - 😆</span>
+          <span class="card-number" id="cardIndex">#1/210</span>
+        </div>
+
+        <div class="card-body">
+          <span class="target-badge" id="cardTarget">Ambos</span>
+          <p class="card-text" id="cardText">¡Bienvenidos! Toquen la carta o el botón de abajo para sacar la primera carta.</p>
+        </div>
+
+        <div class="card-footer">
+          <span id="penaltyHint">Si no cumples: 1 trago</span>
+          <button class="timer-btn" id="timerBtn" style="display:none;" onclick="startTimer(event)">⏱️ 30s</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="controls">
+    <div class="action-row">
+      <button class="btn btn-drink" id="penaltyActionBtn" onclick="handlePenalty()">🍻 Tomé (+1)</button>
+      <button class="btn btn-next" onclick="nextCard()">Siguiente Carta ➡️</button>
+    </div>
+    <button class="btn-skip-level" id="skipLevelBtn" onclick="skipToNextLevel()">⏭️ Pasar al Nivel 2 - 🥵</button>
+    <div class="progress-info" id="progressInfo">Cartas restantes: 210</div>
+  </footer>
+
+  <!-- MODAL DE CASTIGO SORPRESA NIVEL 3 -->
+  <div class="modal-overlay" id="punishModal" onclick="closePunishModal()">
+    <div class="modal" onclick="event.stopPropagation()">
+      <h3>⚡ Castigo de Nivel 3 - 😈🔥</h3>
+      <p style="font-size:0.85rem; color:#b5a8c9;">Por negarse a cumplir la carta, además de sumar 1 trago debes cumplir este castigo ahora mismo:</p>
+      <div class="punishment-box" id="punishText"></div>
+      <button class="btn btn-next" onclick="acceptPunishment()">¡Cumplido, seguir jugando!</button>
+    </div>
+  </div>
+
+  <!-- MODAL DE REGLAS -->
+  <div class="modal-overlay" id="rulesModal" onclick="closeModal()">
+    <div class="modal" onclick="event.stopPropagation()">
+      <h3>📜 Reglas para Ariana y Andrés</h3>
+      <ul>
+        <li><strong>Nivel 1 - 😆:</strong> Empieza siempre con la carta de bienvenida (#1), mezcla al azar las cartas #2 a #89 y cierra siempre con la carta #90 que abre el siguiente nivel.</li>
+        <li><strong>Nivel 2 - 🥵 y Nivel 3 - 😈🔥:</strong> Salen en orden progresivo de menor a mayor intensidad hasta llegar a la carta #210.</li>
+        <li><strong>Pasar de Nivel:</strong> Si ya entraron en calor y quieren subir de nivel antes de acabar el mazo actual, toquen <strong>«⏭️ Pasar al siguiente nivel»</strong> abajo.</li>
+        <li><strong>Comodín ★:</strong> Cada uno tiene 1 pase libre para obligar al otro a cumplir una carta sin poder negarse.</li>
+      </ul>
+      <button class="btn btn-next" onclick="closeModal()">¡Entendido!</button>
+    </div>
+  </div>
+
+  <script>
+    const LEVELS = {
+      1: { name: "Nivel 1 - 😆", color: "#00c2ff", penalty: "Si no cumples: 1 trago" },
+      2: { name: "Nivel 2 - 🥵", color: "#ff2a85", penalty: "Si te niegas: 1 shot o prenda" },
+      3: { name: "Nivel 3 - 😈🔥", color: "#ff004c", penalty: "Negarse = Trago + Castigo" }
+    };
+
+    const EXTRA_PUNISHMENTS_L3 = [
+      "Quítate una prenda de ropa inmediatamente (si ya no llevas ropa, ponte de rodillas y dale 45 segundos de besos u oral en la zona que tu pareja elija).",
+      "Sumisión por 1 minuto: Quédate completamente inmóvil con los ojos cerrados mientras tu pareja toca, besa o lame cualquier parte de tu cuerpo sin que puedas meter las manos.",
+      "Colócate en cuatro o boca arriba al borde de la cama y recibe 5 nalgadas (de suaves a intensas) seguidas de 30 segundos de caricias íntimas.",
+      "Castigo Oral: Debes darle 45 segundos continuos de sexo oral a tu pareja ahora mismo sin detenerte hasta que suene el reloj.",
+      "Tus manos quedan sujetas por encima de tu cabeza durante los próximos 2 turnos mientras tu pareja hace con tu cuerpo lo que quiera.",
+      "Pasa un hielo por tus labios y recorre con tu boca desde el cuello hasta la entrepierna de tu pareja durante 45 segundos."
+    ];
+
+    const ALL_CARDS = [
+      // ==================== NIVEL 1 - 😆 (CARTAS 1 - 90) ====================
+      // Carta 1: SIEMPRE PRIMERA (Bienvenida)
+      { id: 1, level: 1, target: "Ambos", text: "¡Bienvenidos al juego de Ariana y Andrés! Choquen sus vasos mirándose a los ojos, pidan un deseo en secreto para esta noche y tomen el primer trago para empezar." },
+
+      // Cartas 2 a 89: SALEN AL AZAR DENTRO DEL NIVEL 1
+      { id: 2, level: 1, target: "Andrés", text: "Imita la cara exacta que pone Ariana cuando está celosa pero dice «no tengo nada». Si ella se ríe, toma ella; si no, tomas tú." },
+      { id: 3, level: 1, target: "Ariana", text: "Confiesa cuál fue tu primer pensamiento real la primera vez que viste a Andrés en persona." },
+      { id: 4, level: 1, target: "Ambos", text: "Guerra de miradas a menos de 10 centímetros de distancia sin parpadear ni reírse. El primero en caer toma un trago." },
+      { id: 5, level: 1, target: "Andrés", text: "Muéstrale a Ariana la última foto que guardaste o tomaste en tu celular sin dar contexto, o toma un trago." },
+      { id: 6, level: 1, target: "Ariana", text: "Intenta adivinar qué parte de su propio cuerpo le gusta más a Andrés. Si aciertas, él toma; si fallas, tomas tú." },
+      { id: 7, level: 1, target: "Andrés", text: "Di 3 manías de Ariana que te parezcan tiernas o graciosas en menos de 15 segundos.", timer: 15 },
+      { id: 8, level: 1, target: "Ariana", text: "Si Andrés fuera un emoji cuando tiene hambre y otro cuando tiene ganas, ¿cuáles serían? Imita las dos caras." },
+      { id: 9, level: 1, target: "Ambos", text: "Piedra, papel o tijera a una sola ronda. El perdedor tiene que darle un trago en la boca al ganador sin que el ganador use las manos." },
+      { id: 10, level: 1, target: "Andrés", text: "Si despertaras mañana en el cuerpo de Ariana por 24 horas, ¿cuáles serían las primeras tres cosas que harías?" },
+      { id: 11, level: 1, target: "Ariana", text: "Revisa los últimos 5 emojis usados en el teclado de Andrés e inventa una historia con ellos, o toma un trago." },
+      { id: 12, level: 1, target: "Andrés", text: "Intenta adivinar de qué color es la ropa interior que lleva Ariana ahora mismo sin mirar. Si fallas, tomas; si aciertas, ella toma." },
+      { id: 13, level: 1, target: "Ariana", text: "Pon una canción que describa cómo se pone Andrés después de un par de copas y báilala 15 segundos.", timer: 15 },
+      { id: 14, level: 1, target: "Ambos", text: "Tomen un trago con los brazos entrelazados mirándose a los ojos. Si alguien derrama una gota, toma doble." },
+      { id: 15, level: 1, target: "Andrés", text: "Háblale a Ariana con acento extranjero tratando de seducirla durante 20 segundos. Si te ríes, tomas.", timer: 20 },
+      { id: 16, level: 1, target: "Ariana", text: "Háblale a Andrés como si fueras una desconocida intentando ligarlo en una barra durante 30 segundos.", timer: 30 },
+      { id: 17, level: 1, target: "Andrés", text: "Carga a Ariana en brazos durante 15 segundos mientras le das un beso. Si te niegas, tomas doble.", timer: 15 },
+      { id: 18, level: 1, target: "Ariana", text: "Dale un beso a Andrés sin usar las manos y haciéndole un cumplido al oído que lo haga sonreír." },
+      { id: 19, level: 1, target: "Ambos", text: "Toma si stalkeaste de pies a cabeza las redes del otro antes de su primera cita." },
+      { id: 20, level: 1, target: "Ambos", text: "Toma si eres quien más tarda en arreglarse cuando van a salir pero siempre dice «ya estoy listo/a»." },
+      { id: 21, level: 1, target: "Ambos", text: "Toma si alguna vez fingiste estar ocupado/a solo para no responder un mensaje al segundo y no verte tan intenso/a." },
+      { id: 22, level: 1, target: "Ambos", text: "Toma si alguna vez te pusiste celoso/a por algo que soñaste que hacía el otro." },
+      { id: 23, level: 1, target: "Ambos", text: "Toma si te has reído en plena discusión seria porque el otro se veía gracioso o tierno enojado." },
+      { id: 24, level: 1, target: "Ambos", text: "Toma si eres el que dice «no sé, elige tú qué comer» pero rechaza las primeras opciones." },
+      { id: 25, level: 1, target: "Ambos", text: "Toma si alguna vez revisaste quién le dio «me encanta» a una foto de tu pareja." },
+      { id: 26, level: 1, target: "Ambos", text: "Toma si alguna vez has releído mensajes viejos o visto fotos de ustedes dos a solas solo para sonreír." },
+      { id: 27, level: 1, target: "Ambos", text: "Toma si alguna vez borraste o archivaste un chat solo para ahorrarte una explicación innecesaria." },
+      { id: 28, level: 1, target: "Ambos", text: "Toma si fuiste tú quien dio el primer paso o mandó el primer mensaje con segunda intención." },
+      { id: 29, level: 1, target: "Ambos", text: "Toma si has presumido a tu pareja frente a tus amigos cuando no estaba presente." },
+      { id: 30, level: 1, target: "Ambos", text: "Toma si hoy elegiste tu ropa o ropa interior pensando en que te la iban a quitar más tarde." },
+      { id: 31, level: 1, target: "Ambos", text: "Toma si has tenido pensamientos nada santos con el otro mientras estabas en el trabajo o estudiando." },
+      { id: 32, level: 1, target: "Ambos", text: "Toma si alguna vez miraste el cuerpo del otro mientras estaba distraído/a y pensaste lo mucho que te encanta." },
+      { id: 33, level: 1, target: "Ambos", text: "Toma si en los últimos 10 minutos te dieron ganas de besar al otro en algo más que los labios." },
+      { id: 34, level: 1, target: "Ambos", text: "Toma si fuiste tú quien tuvo la iniciativa la primera vez que terminaron en la cama." },
+      { id: 35, level: 1, target: "Ambos", text: "Toma si desde que empezó el juego ya imaginaste cómo va a terminar esta noche." },
+      { id: 36, level: 1, target: "Ambos", text: "Toma si sabes perfectamente que hoy ninguno de los dos va a dormir temprano." },
+      { id: 37, level: 1, target: "Ambos", text: "Yo nunca nunca he imaginado cómo sería nuestra vida si viviéramos juntos en otro lugar." },
+      { id: 38, level: 1, target: "Ambos", text: "Yo nunca nunca he mentido diciendo «ya estoy saliendo» cuando todavía estaba en toalla o en la cama." },
+      { id: 39, level: 1, target: "Ambos", text: "Yo nunca nunca me he quedado callado/a cuando algo me dio celos esperando que el otro se diera cuenta solo." },
+      { id: 40, level: 1, target: "Ambos", text: "Yo nunca nunca he buscado el perfil de algún ex o casi-algo de mi pareja por pura curiosidad." },
+      { id: 41, level: 1, target: "Ambos", text: "Yo nunca nunca he sentido celos de un amigo o amiga de mi pareja aunque no lo haya dicho." },
+      { id: 42, level: 1, target: "Ambos", text: "Yo nunca nunca he subido una historia o estado pensando únicamente en que mi pareja la viera y reaccionara." },
+      { id: 43, level: 1, target: "Ambos", text: "Yo nunca nunca he sentido mariposas o corriente en el cuerpo por un simple roce o mirada del otro." },
+      { id: 44, level: 1, target: "Ambos", text: "Yo nunca nunca he fingido prestar atención a una película cuando en realidad solo quería empezar a tocar a mi pareja." },
+      { id: 45, level: 1, target: "Ambos", text: "Yo nunca nunca he tenido un sueño húmedo o erótico con la persona que tengo enfrente." },
+      { id: 46, level: 1, target: "Ambos", text: "Yo nunca nunca he mirado con morbo a mi pareja mientras se vestía o salía de la ducha." },
+      { id: 47, level: 1, target: "Ambos", text: "Yo nunca nunca he inventado una excusa para quedarme a solas con mi pareja e ir directo a la cama." },
+      { id: 48, level: 1, target: "Ambos", text: "Yo nunca nunca me he quedado con ganas de un segundo round pero no dije nada por cansancio." },
+      { id: 49, level: 1, target: "Ambos", text: "Yo nunca nunca me he tocado a solas pensando en la persona que tengo enfrente." },
+      { id: 50, level: 1, target: "Ambos", text: "Yo nunca nunca he tenido ganas de hacerlo en un baño, auto o lugar donde nos pudieran descubrir." },
+      { id: 51, level: 1, target: "Ambos", text: "Yo nunca nunca he querido grabarnos o sacarnos una foto íntima mientras estamos en la cama." },
+      { id: 52, level: 1, target: "Ambos", text: "Yo nunca nunca he querido probar vendas en los ojos, ataduras o juguetes con mi pareja." },
+      { id: 53, level: 1, target: "Ambos", text: "Yo nunca nunca he tenido una fantasía subida de tono que todavía no me he atrevido a contarle al otro." },
+      { id: 54, level: 1, target: "Ambos", text: "Yo nunca nunca he deseado que mi pareja me domine por completo en la cama." },
+      { id: 55, level: 1, target: "Andrés", text: "¿Qué fue lo primero que pensaste de Ariana que hoy te daría vergüenza admitir?" },
+      { id: 56, level: 1, target: "Ariana", text: "¿Hubo algún momento al inicio en el que dudaste si salir con Andrés era buena idea? ¿Por qué?" },
+      { id: 57, level: 1, target: "Andrés", text: "¿Cuál ha sido la mentira piadosa o excusa más floja que le has dicho a Ariana?" },
+      { id: 58, level: 1, target: "Ariana", text: "¿Cuál es la manía o actitud de Andrés que más paciencia te cuesta aguantar?" },
+      { id: 59, level: 1, target: "Andrés", text: "¿Qué es lo que más te cuesta admitir cuando sabes que no tienes la razón en una discusión con Ariana?" },
+      { id: 60, level: 1, target: "Ariana", text: "Del 1 al 10, ¿qué tan celosa eres realmente y cuál ha sido tu momento de mayores celos con Andrés?" },
+      { id: 61, level: 1, target: "Andrés", text: "¿Alguna vez alguien te tiró la onda estando con Ariana y preferiste callártelo para evitar líos? Cuenta quién o toma doble." },
+      { id: 62, level: 1, target: "Ariana", text: "¿Alguna vez alguien intentó coquetearte por redes estando con Andrés y no se lo contaste? Muestra o cuenta, o toma doble." },
+      { id: 63, level: 1, target: "Andrés", text: "Si vieras el celular de Ariana desbloqueado y supieras que jamás se enteraría, ¿qué aplicación revisarías primero?" },
+      { id: 64, level: 1, target: "Ariana", text: "¿Qué es algo que Andrés hace frente a otras personas que a veces te da un poquito de celos o incomodidad?" },
+      { id: 65, level: 1, target: "Andrés", text: "¿Alguna vez has comparado algo íntimo de nuestra relación con una experiencia pasada? Responde o toma un shot." },
+      { id: 66, level: 1, target: "Ariana", text: "¿Quién de los dos es más orgulloso después de una pelea y quién busca primero reconciliarse en la cama?" },
+      { id: 67, level: 1, target: "Andrés", text: "¿Quién de los dos crees que lleva las riendas en la relación y quién domina realmente en la cama?" },
+      { id: 68, level: 1, target: "Ariana", text: "¿Cuál fue la vez que estuviste con Andrés en la que sentiste más placer de todas y por qué?" },
+      { id: 69, level: 1, target: "Andrés", text: "¿Qué prenda o estilo de ropa que usa Ariana hace que te den ganas de quitarle todo de inmediato?" },
+      { id: 70, level: 1, target: "Ariana", text: "¿Alguna vez te quedaste con ganas de pedirle algo más sucio o intenso en la cama a Andrés pero te dio pena? Dilo ahora." },
+      { id: 71, level: 1, target: "Andrés", text: "Confiesa qué lugar fuera de la cama te da más morbo estrenar con Ariana." },
+      { id: 72, level: 1, target: "Ambos", text: "A la cuenta de 3, señalen quién se enamoró primero y quién es el más caliente de los dos. Si no coinciden, ambos toman." },
+      { id: 73, level: 1, target: "Andrés", text: "¿En qué momento exacto te diste cuenta de que Ariana te importaba mucho más que cualquier otra persona?" },
+      { id: 74, level: 1, target: "Ariana", text: "¿Qué es lo que te hace sentir más querida, segura y deseada cuando estás en los brazos de Andrés?" },
+      { id: 75, level: 1, target: "Andrés", text: "¿Cuál es el recuerdo más bonito e inolvidable que tienes guardado de ustedes dos hasta hoy?" },
+      { id: 76, level: 1, target: "Ariana", text: "¿Cuál es tu mayor miedo sobre el futuro y cómo sientes que Andrés te da paz cuando piensas en eso?" },
+      { id: 77, level: 1, target: "Andrés", text: "Di tres cosas que admiras profundamente de la forma de ser de Ariana y que no le dices todos los días." },
+      { id: 78, level: 1, target: "Ariana", text: "¿Alguna vez sentiste miedo real de perder a Andrés? Cuenta en qué momento fue." },
+      { id: 79, level: 1, target: "Andrés", text: "¿Qué parte de ti sientes que muy poca gente conoce de verdad, excepto Ariana?" },
+      { id: 80, level: 1, target: "Ariana", text: "Si pudieras volver a vivir en cámara lenta un solo momento junto a Andrés, ¿cuál elegirías?" },
+      { id: 81, level: 1, target: "Andrés", text: "Toma las manos de Ariana, mírala a los ojos y dile qué es lo que más te enorgullece de que ella sea tu pareja." },
+      { id: 82, level: 1, target: "Ariana", text: "Acaricia la cara de Andrés mientras le dices qué fue lo que él despertó o cambió en ti desde que están juntos." },
+      { id: 83, level: 1, target: "Andrés", text: "Acércate a Ariana y cuéntale al oído cuál fue el beso entre ustedes dos que más te encendió." },
+      { id: 84, level: 1, target: "Ariana", text: "Dile a Andrés mirándolo a los ojos qué gesto, mirada o movimiento suyo hace que te derritas al instante." },
+      { id: 85, level: 1, target: "Ambos", text: "Dense un abrazo de 30 segundos en silencio sintiendo su respiración y, al terminar, díganse una promesa al oído.", timer: 30 },
+      { id: 86, level: 1, target: "Andrés", text: "Siéntate bien pegado a Ariana, pasa tu brazo por su cintura y dale un beso lento en los labios de 15 segundos.", timer: 15 },
+      { id: 87, level: 1, target: "Ariana", text: "Acaricia el cuello y la nuca de Andrés mientras le das un beso suave que empiece lento y termine mordiendo su labio." },
+      { id: 88, level: 1, target: "Andrés", text: "Dile al oído a Ariana qué es lo que más te gusta de su cuerpo cuando están a solas." },
+      { id: 89, level: 1, target: "Ariana", text: "Pega tu frente a la de Andrés, míralo de cerca y dile qué tantas ganas le tienes esta noche del 1 al 10." },
+
+      // Carta 90: SIEMPRE ÚLTIMA DEL NIVEL 1 (Abre el Nivel 2)
+      { id: 90, level: 1, target: "Ambos", text: "¡Nivel 1 completado! Tomen un trago juntos, acérquense sin dejar espacio entre los dos y dense un beso profundo de 20 segundos para abrir el Nivel 2 - 🥵.", timer: 20 },
+
+      // ==================== NIVEL 2 - 🥵 (CARTAS 91 - 120 · EN ORDEN PROGRESIVO) ====================
+      { id: 91, level: 2, target: "Andrés", text: "Besa lentamente el cuello de Ariana desde detrás de la oreja hasta la clavícula durante 25 segundos.", timer: 25 },
+      { id: 92, level: 2, target: "Ariana", text: "Siéntate a horcajadas sobre las piernas de Andrés (mirándolo de frente) durante los próximos 3 turnos." },
+      { id: 93, level: 2, target: "Andrés", text: "Pasa tus manos por la cintura y la espalda de Ariana acercándola contra tu cuerpo mientras le besas los labios por 25 segundos.", timer: 25 },
+      { id: 94, level: 2, target: "Ariana", text: "Dale a Andrés tres besos seguidos: uno tierno, uno mordiendo su labio inferior y uno húmedo con lengua de 20 segundos.", timer: 20 },
+      { id: 95, level: 2, target: "Andrés", text: "Toma un sorbo de tu bebida y pásaselo a Ariana boca a boca terminando en un beso apasionado." },
+      { id: 96, level: 2, target: "Ariana", text: "Susúrrale al oído a Andrés, mordiendo suavemente su oreja, qué parte de su cuerpo te da más ganas de besar ahora mismo." },
+      { id: 97, level: 2, target: "Andrés", text: "Besa la parte interna de la muñeca de Ariana, sube por su brazo, su hombro y termina mordiendo suavemente su nuca." },
+      { id: 98, level: 2, target: "Ariana", text: "Pasa la punta de tu lengua lentamente desde la garganta de Andrés hasta su barbilla y muérdele el labio." },
+      { id: 99, level: 2, target: "Andrés", text: "Pasa tus labios rozando los de Ariana durante 20 segundos sin llegar a besarla del todo hasta el último segundo.", timer: 20 },
+      { id: 100, level: 2, target: "Ariana", text: "Baila pegada a Andrés durante 30 segundos haciendo que tus caderas rocen las suyas.", timer: 30 },
+      { id: 101, level: 2, target: "Andrés", text: "Quítale a Ariana una prenda de ropa exterior usando la mayor lentitud y contacto visual posible." },
+      { id: 102, level: 2, target: "Ariana", text: "Mete tus manos por debajo del polo o camisa de Andrés y acaricia su pecho y abdomen con las uñas suaves durante 30 segundos.", timer: 30 },
+      { id: 103, level: 2, target: "Andrés", text: "Haz que Ariana cierre los ojos y dale un beso en 3 lugares distintos de su cuerpo (fuera de la cara) para que adivine el orden." },
+      { id: 104, level: 2, target: "Ariana", text: "Quítale el polo o camisa a Andrés ahora mismo usando una sola mano o los dientes." },
+      { id: 105, level: 2, target: "Andrés", text: "Quítale la prenda superior (blusa o polo) a Ariana ahora mismo y bésale los hombros y el escote por 25 segundos.", timer: 25 },
+      { id: 106, level: 2, target: "Ariana", text: "Pasa tus manos por la espalda desnuda de Andrés bajando hasta apretar sus glúteos mientras lo besas." },
+      { id: 107, level: 2, target: "Andrés", text: "Acuesta a Ariana y recorre con tus labios desde su ombligo hasta su cuello sin usar las manos." },
+      { id: 108, level: 2, target: "Ariana", text: "Acuéstate encima de Andrés pecho con pecho y bésalo durante 30 segundos moviendo suavemente tu cintura contra él.", timer: 30 },
+      { id: 109, level: 2, target: "Andrés", text: "Déjale una marca de beso o un mordisco suave a Ariana en la cadera, el hombro o el escote." },
+      { id: 110, level: 2, target: "Ambos", text: "Beso francés intenso de 40 segundos con las manos en la espalda (prohibido tocarse con las manos). El primero que use las manos pierde una prenda.", timer: 40 },
+      { id: 111, level: 2, target: "Andrés", text: "Acaricia las piernas y los muslos de Ariana subiendo lentamente hasta rozar el borde de su ropa interior durante 30 segundos.", timer: 30 },
+      { id: 112, level: 2, target: "Ariana", text: "Desabróchale o bájale el cierre del pantalón a Andrés manteniendo contacto visual fijo." },
+      { id: 113, level: 2, target: "Andrés", text: "Besa todo el contorno del pecho de Ariana (por encima y por los bordes de su sostén/top) durante 30 segundos.", timer: 30 },
+      { id: 114, level: 2, target: "Ariana", text: "Date la vuelta, apoya tus manos en la pared o la cama y deja que Andrés te abrace por detrás besándote el cuello y acariciando tu cuerpo por 30 segundos.", timer: 30 },
+      { id: 115, level: 2, target: "Andrés", text: "Hazle un masaje sensual a Ariana empezando en la espalda baja y bajando hasta sus glúteos y muslos por 45 segundos.", timer: 45 },
+      { id: 116, level: 2, target: "Ariana", text: "Quítale el pantalón o short a Andrés ahora mismo para que quede solo en ropa interior." },
+      { id: 117, level: 2, target: "Andrés", text: "Quítale el pantalón, falda o short a Ariana ahora mismo mientras besas sus piernas al bajarlo." },
+      { id: 118, level: 2, target: "Ariana", text: "Toca y acaricia a Andrés por encima de su ropa interior durante 25 segundos mientras lo miras a los ojos y ves cómo reacciona.", timer: 25 },
+      { id: 119, level: 2, target: "Andrés", text: "Acaricia a Ariana por encima de su ropa interior con movimientos circulares suaves durante 30 segundos mientras le besas el cuello.", timer: 30 },
+      { id: 120, level: 2, target: "Ambos", text: "Final del Nivel 2 - 🥵: Andrés desabrocha el sostén de Ariana con una sola mano. Ambos quedan únicamente en ropa interior inferior para entrar al Nivel 3 - 😈🔥." },
+
+      // ==================== NIVEL 3 - 😈🔥 (CARTAS 121 - 210 · EN ORDEN PROGRESIVO) ====================
+      { id: 121, level: 3, target: "Andrés", text: "Descubre por completo los pechos de Ariana y dedica 45 segundos exclusivamente a besarlos, lamerlos y acariciarlos con ambas manos.", timer: 45 },
+      { id: 122, level: 3, target: "Ariana", text: "Recorre con tus labios y tu lengua desde el cuello de Andrés bajando por sus pectorales y su abdomen hasta el elástico de su ropa interior durante 40 segundos.", timer: 40 },
+      { id: 123, level: 3, target: "Andrés", text: "Tapa o venda los ojos de Ariana. Recorre su cuerpo con tus labios desde el cuello hasta los muslos durante 45 segundos sin que ella sepa dónde besarás después.", timer: 45 },
+      { id: 124, level: 3, target: "Ariana", text: "Enfría tus labios con un hielo o bebida fría y baja besando el pecho y abdomen de Andrés hasta rozar su zona íntima por encima de la tela por 40 segundos.", timer: 40 },
+      { id: 125, level: 3, target: "Andrés", text: "Colócate entre las piernas de Ariana y dale besos húmedos y mordiscos suaves por toda la parte interna de los muslos acercándote al centro sin tocarlo aún durante 45 segundos.", timer: 45 },
+      { id: 126, level: 3, target: "Ariana", text: "Súbete encima de Andrés y frota tu cadera lentamente contra la suya durante 45 segundos mientras le muerdes el labio y le dices al oído qué quieres hacerle.", timer: 45 },
+      { id: 127, level: 3, target: "Andrés", text: "Sujeta ambas muñecas de Ariana con una sola mano por encima de su cabeza sobre la cama y bésala mientras tu mano libre acaricia sus pechos y el borde de su ropa interior por 45 segundos.", timer: 45 },
+      { id: 128, level: 3, target: "Ariana", text: "Mete tu mano por dentro de la ropa interior de Andrés y acarícialo de arriba abajo lentamente durante 40 segundos mirándolo fijo a los ojos.", timer: 40 },
+      { id: 129, level: 3, target: "Andrés", text: "Toma la mano de Ariana o deja que ella guíe tus dedos por dentro de su ropa interior con la velocidad y presión que más le gusta durante 45 segundos.", timer: 45 },
+      { id: 130, level: 3, target: "Ariana", text: "Quítale por completo la ropa interior a Andrés usando lentamente tus manos y dándole un beso justo al terminar de bajarla." },
+      { id: 131, level: 3, target: "Andrés", text: "Quítale lentamente la última prenda (ropa interior) a Ariana usando los dientes o una sola mano mientras besas sus caderas y su abdomen." },
+      { id: 132, level: 3, target: "Ambos", text: "Ya sin nada de ropa: Acuéstense piel con piel abrazados y bésense mientras sus manos recorren todo el cuerpo desnudo del otro durante 45 segundos.", timer: 45 },
+      { id: 133, level: 3, target: "Ariana", text: "Pasa tus pechos desnudos por el pecho, el abdomen y la zona íntima de Andrés mientras lo miras a los ojos durante 45 segundos.", timer: 45 },
+      { id: 134, level: 3, target: "Andrés", text: "Acuesta a Ariana boca abajo completamente desnuda y recorre con tu lengua y tus manos desde su nuca y espalda baja hasta sus glúteos y muslos por 45 segundos.", timer: 45 },
+      { id: 135, level: 3, target: "Ariana", text: "Acaricia a Andrés con tus manos y los labios durante 45 segundos provocando que se ponga al máximo, deteniéndote justo cuando suene el reloj.", timer: 45 },
+      { id: 136, level: 3, target: "Andrés", text: "Acaricia la entrada y el clítoris de Ariana con tus dedos húmedos durante 45 segundos mientras besas y succionas sus pezones.", timer: 45 },
+      { id: 137, level: 3, target: "Ariana", text: "Súbete a horcajadas sobre Andrés piel con piel y desliza tu humedad contra él durante 45 segundos sin permitir que entre todavía.", timer: 45 },
+      { id: 138, level: 3, target: "Andrés", text: "Pon a Ariana de pie o de rodillas frente a ti, abrázala por detrás y haz que una de tus manos juegue con sus pechos y la otra entre sus piernas durante 45 segundos.", timer: 45 },
+      { id: 139, level: 3, target: "Ariana", text: "Empuja a Andrés boca arriba en la cama, sujétale las muñecas contra la almohada y besa y lame su cuerpo donde tú quieras durante 45 segundos sin que él pueda mover las manos.", timer: 45 },
+      { id: 140, level: 3, target: "Ambos", text: "Acuéstense frente a frente de lado y estimúlense mutuamente con las manos al mismo tiempo mientras se besan con lengua sin parar durante 60 segundos.", timer: 60 },
+      { id: 141, level: 3, target: "Andrés", text: "Baja entre las piernas de Ariana y dedícale 60 segundos completos de sexo oral usando la punta de tu lengua en círculos sobre su clítoris.", timer: 60 },
+      { id: 142, level: 3, target: "Ariana", text: "Dedícale 60 segundos completos de sexo oral a Andrés usando tus labios, lengua y una mano en la base mientras lo miras hacia arriba.", timer: 60 },
+      { id: 143, level: 3, target: "Andrés", text: "El Semáforo: Estimula con lengua y dedos a Ariana por 60 segundos. Ella solo puede guiarte diciendo «Verde» (sigue así), «Amarillo» (más rápido) o «Rojo» (cambia el movimiento).", timer: 60 },
+      { id: 144, level: 3, target: "Ariana", text: "Besa y lame desde la base y los testículos de Andrés subiendo hasta la punta muy despacio, alternando ritmo lento y rápido cada 15 segundos durante 60 segundos.", timer: 60 },
+      { id: 145, level: 3, target: "Andrés", text: "Coloca dos dedos dentro de Ariana haciendo el movimiento de «ven aquí» hacia arriba mientras besas y succionas su clítoris al mismo tiempo durante 45 segundos.", timer: 45 },
+      { id: 146, level: 3, target: "Ariana", text: "Reto del Silencio: Estimula a Andrés con tu boca y tus manos durante 45 segundos; si él suelta un gemido audible o mueve las caderas, debe cumplir el castigo sexual que tú le ordenes.", timer: 45 },
+      { id: 147, level: 3, target: "Andrés", text: "Prueba de Resistencia: Estimula el punto más sensible de Ariana con tu lengua durante 45 segundos continuos mientras ella intenta no cerrar las piernas ni arquear la espalda.", timer: 45 },
+      { id: 148, level: 3, target: "Ariana", text: "Ponte de rodillas frente a Andrés mientras él está de pie o sentado al borde de la cama; él tiene prohibido tocar tu cabeza mientras tú le haces sexo oral a tu gusto por 50 segundos.", timer: 50 },
+      { id: 149, level: 3, target: "Andrés", text: "Abre las piernas de Ariana y escribe el abecedario completo de la A a la Z con la punta de tu lengua sobre su clítoris sin detenerte.", timer: 50 },
+      { id: 150, level: 3, target: "Ariana", text: "Contacto Visual Extremo: Estimula oralmente a Andrés durante 45 segundos usando solo la punta de tu lengua y tus labios sobre el glande sin despegar tus ojos de los suyos.", timer: 45 },
+      { id: 151, level: 3, target: "Andrés", text: "Toma un trago frío o pasa un hielo por tu lengua e inmediatamente realiza sexo oral a Ariana durante 45 segundos para que sienta el contraste térmico.", timer: 45 },
+      { id: 152, level: 3, target: "Ariana", text: "Toma el control de la cabeza de Andrés con ambas manos mientras él está entre tus piernas y guíalo exactamente donde quieres su lengua durante 60 segundos.", timer: 60 },
+      { id: 153, level: 3, target: "Andrés", text: "Castigo de provocación para Ariana: Estimúlala con la boca y los dedos y cada vez que ella gima detente 3 segundos obligándola a pedirte «sigue por favor» durante 60 segundos.", timer: 60 },
+      { id: 154, level: 3, target: "Ariana", text: "Castigo de provocación para Andrés: Hazle sexo oral deteniéndote por completo cada 10 segundos; él tiene las manos atadas a la almohada y solo puede pedirte que sigas durante 60 segundos.", timer: 60 },
+      { id: 155, level: 3, target: "Andrés", text: "Besa y muerde suavemente los glúteos de Ariana durante 20 segundos y luego dale sexo oral por detrás (con ella en cuatro o boca abajo) durante 40 segundos.", timer: 60 },
+      { id: 156, level: 3, target: "Ariana", text: "Siéntate sobre la cara de Andrés (mirando hacia él o hacia sus pies) apoyando tus rodillas a los lados de su cabeza para que te dé placer oral a tu ritmo durante 50 segundos.", timer: 50 },
+      { id: 157, level: 3, target: "Andrés", text: "Castigo dulce para Ariana: Ella debe quedarse al borde de la cama sujetando la sábana con ambas manos sin soltarla mientras tú usas tu boca y tus dedos entre sus piernas por 60 segundos.", timer: 60 },
+      { id: 158, level: 3, target: "Ariana", text: "Acuesta a Andrés con los ojos cerrados y alterna entre usar tu boca, tus manos y rozarlo con tus pechos o entrepierna para que no sepa qué sigue durante 50 segundos.", timer: 50 },
+      { id: 159, level: 3, target: "Ambos", text: "Colóquense de lado uno frente al otro en sentido inverso (69 lateral) y disfruten de sexo oral simultáneo sin detenerse durante 60 segundos.", timer: 60 },
+      { id: 160, level: 3, target: "Ambos", text: "Andrés se acuesta boca arriba y Ariana se coloca encima en posición 69 clásico para darse placer oral mutuo al mismo tiempo durante 60 segundos.", timer: 60 },
+      { id: 161, level: 3, target: "Andrés", text: "Desliza la punta por toda la entrada húmeda de Ariana de arriba abajo sin entrar del todo durante 40 segundos mientras la besas en la boca para llevar las ganas al límite.", timer: 40 },
+      { id: 162, level: 3, target: "Ariana", text: "Guía a Andrés con tu mano en tu entrada, deja que entre solo unos centímetros y muévete muy suave durante 40 segundos sin dejar que entre hasta el fondo todavía.", timer: 40 },
+      { id: 163, level: 3, target: "Andrés", text: "Entra hasta el fondo de Ariana en un solo movimiento lento y quédense completamente quietos abrazados y besándose durante 30 segundos sintiendo el calor sin mover la cadera.", timer: 30 },
+      { id: 164, level: 3, target: "Ariana", text: "Mientras Andrés está dentro de ti, aprieta y suelta tus músculos internos al ritmo de tu respiración durante 40 segundos mientras le muerdes el cuello.", timer: 40 },
+      { id: 165, level: 3, target: "Andrés", text: "Alterna 9 empujes superficiales (solo la punta) y 1 empuje profundo hasta el fondo dentro de Ariana, repitiendo ese ciclo durante 60 segundos.", timer: 60 },
+      { id: 166, level: 3, target: "Ambos", text: "Andrés encima de Ariana sosteniendo su peso en los antebrazos, entrelazando sus dedos con las manos de ella sobre la almohada y moviéndose lento y profundo por 60 segundos.", timer: 60 },
+      { id: 167, level: 3, target: "Andrés", text: "Besa y succiona los pechos de Ariana mientras la penetras lentamente boca arriba, sin separar tu boca de su cuello y su pecho durante 60 segundos.", timer: 60 },
+      { id: 168, level: 3, target: "Ambos", text: "Andrés se sienta con las piernas cruzadas; Ariana se sienta sobre su regazo rodeando su cintura con las piernas, moviéndose abrazados piel con piel y besándose por 60 segundos.", timer: 60 },
+      { id: 169, level: 3, target: "Ariana", text: "Haz que Andrés se siente con la espalda apoyada en la cabecera, súbete frente a él y bésalo con lengua sin despegar tus labios de los suyos mientras mueves tus caderas por 60 segundos.", timer: 60 },
+      { id: 170, level: 3, target: "Ambos", text: "Acuéstense de lado mirando hacia la misma dirección (cucharita); Andrés entra por detrás levantando ligeramente la pierna de Ariana mientras le besa el cuello y acaricia su pecho por 60 segundos.", timer: 60 },
+      { id: 171, level: 3, target: "Ambos", text: "Acuéstense de lado pero mirándose cara a cara; Ariana pasa su pierna superior por encima de la cadera de Andrés para hacerlo lento, besándose y acariciándose por 60 segundos.", timer: 60 },
+      { id: 172, level: 3, target: "Ambos", text: "Andrés se acuesta boca arriba y Ariana se sube a horcajadas encima de él, llevando el control absoluto de la velocidad, profundidad y movimiento de caderas por 60 segundos.", timer: 60 },
+      { id: 173, level: 3, target: "Ariana", text: "Pon tus manos en el pecho de Andrés, empújalo contra la cama y móntalo haciendo solo movimientos circulares y de adelante hacia atrás con la cadera (sin rebotar) durante 50 segundos.", timer: 50 },
+      { id: 174, level: 3, target: "Andrés", text: "Sujeta a Ariana de la cintura mientras ella está encima de ti y ayúdala a subir y bajar marcando tú la fuerza y velocidad desde abajo durante 60 segundos.", timer: 60 },
+      { id: 175, level: 3, target: "Ariana", text: "Colócate encima de Andrés mirándolo de frente pero inclínate hacia atrás apoyando tus manos en sus rodillas o tobillos mientras te mueves por 60 segundos.", timer: 60 },
+      { id: 176, level: 3, target: "Ambos", text: "Andrés boca arriba; Ariana se sienta encima de él dándole la espalda (vaquera invertida) e inclinándose un poco hacia adelante mientras él acaricia sus glúteos y caderas por 60 segundos.", timer: 60 },
+      { id: 177, level: 3, target: "Andrés", text: "Siéntate en la cama con las piernas estiradas; Ariana se sienta encima de ti mirando hacia tus pies y apoya sus manos en tus tobillos mientras ambos se mueven por 60 segundos.", timer: 60 },
+      { id: 178, level: 3, target: "Ariana", text: "Ponte en cuclillas encima de Andrés (apoyando tus pies en el colchón a los lados de su cadera) y controla la profundidad subiendo y bajando durante 45 segundos.", timer: 45 },
+      { id: 179, level: 3, target: "Ambos", text: "Ariana se recuesta de lado; Andrés se arrodilla a horcajadas sobre la pierna inferior de ella y sube la otra pierna de Ariana sobre su cintura para combinar profundidad y contacto visual por 60 segundos.", timer: 60 },
+      { id: 180, level: 3, target: "Andrés", text: "Coloca una almohada debajo de la cadera de Ariana mientras está boca arriba y penétrala lentamente mientras una de tus manos estimula su clítoris en círculos sin parar por 60 segundos.", timer: 60 },
+      { id: 181, level: 3, target: "Ariana", text: "Acuéstate boca arriba, levanta una sola pierna sobre el hombro de Andrés dejando la otra estirada en la cama y míralo mientras marca el ritmo durante 60 segundos.", timer: 60 },
+      { id: 182, level: 3, target: "Ambos", text: "Ariana boca arriba elevando ambas piernas juntas sobre el pecho y los hombros de Andrés para lograr el ángulo más profundo durante 60 segundos.", timer: 60 },
+      { id: 183, level: 3, target: "Andrés", text: "Cruza los tobillos de Ariana por detrás de tu cuello mientras está boca arriba y mantén un ritmo profundo mirándola directamente a los ojos sin parpadear por 60 segundos.", timer: 60 },
+      { id: 184, level: 3, target: "Ambos", text: "Ariana se acuesta boca arriba con las caderas justo en el borde del colchón y las piernas sobre los hombros de Andrés, quien marca el ritmo de pie o de rodillas por 60 segundos.", timer: 60 },
+      { id: 185, level: 3, target: "Andrés", text: "Levanta las caderas de Ariana tomándola por los glúteos mientras está boca arriba para que quede suspendida sobre tus muslos y marca un ritmo intenso durante 50 segundos.", timer: 50 },
+      { id: 186, level: 3, target: "Ambos", text: "Acuéstense boca arriba entrelazando sus piernas en forma de X (tijera) para penetrar con un ángulo lento y profundo mientras ambos se acarician por 60 segundos.", timer: 60 },
+      { id: 187, level: 3, target: "Ambos", text: "Pónganse de rodillas frente a frente en la cama abrazados; Andrés levanta una pierna de Ariana sobre su muslo para entrar pegados cuerpo a cuerpo mientras se besan por 60 segundos.", timer: 60 },
+      { id: 188, level: 3, target: "Ambos", text: "Andrés se sienta en una silla o al borde de la cama con los pies en el suelo; Ariana se sienta encima mirándolo de frente y controla el rebote sujetándose de sus hombros por 60 segundos.", timer: 60 },
+      { id: 189, level: 3, target: "Andrés", text: "Siéntate al borde de la cama, sienta a Ariana en tus piernas dándote la espalda y haz que se incline hacia adelante tocando el suelo mientras la penetras por 60 segundos.", timer: 60 },
+      { id: 190, level: 3, target: "Ambos", text: "Ariana se pone en cuatro puntos arqueando la cintura mientras Andrés la sujeta firmemente de la cadera por detrás durante 60 segundos.", timer: 60 },
+      { id: 191, level: 3, target: "Andrés", text: "Coloca a Ariana en cuatro pero haz que apoye el pecho y los hombros en el colchón levantando bien las caderas; sujétala de la cintura mientras marcas el ritmo por 60 segundos.", timer: 60 },
+      { id: 192, level: 3, target: "Andrés", text: "Sujeta ambas manos de Ariana detrás de su espalda mientras está en cuatro, dale 3 nalgadas suaves y penétrala por detrás marcando tú toda la fuerza durante 50 segundos.", timer: 50 },
+      { id: 193, level: 3, target: "Ambos", text: "Ariana se acuesta completamente boca abajo con las piernas juntas y estiradas; Andrés se coloca encima de ella y entra por detrás (fricción máxima) besándole la nuca por 60 segundos.", timer: 60 },
+      { id: 194, level: 3, target: "Ambos", text: "Ariana de pie inclinándose sobre el borde de la cama o la pared; Andrés entra por detrás sujetando su cintura con una mano y acariciando su clítoris con la otra por 60 segundos.", timer: 60 },
+      { id: 195, level: 3, target: "Andrés", text: "Lleva a Ariana contra la pared de frente, levanta una de sus piernas sobre tu cintura y penétrala de pie mientras la besas contra el muro durante 50 segundos.", timer: 50 },
+      { id: 196, level: 3, target: "Andrés", text: "Sienta a Ariana en el borde alto de una cómoda, mesa o cabecera, abre sus piernas rodeando tu cintura y hazlo de pie mirándola a los ojos por 60 segundos.", timer: 60 },
+      { id: 197, level: 3, target: "Ariana", text: "Sujeta las manos de Andrés sobre la almohada, súbete encima de él y muévete tan lento o tan rápido como quieras durante 60 segundos sin dejar que él suelte tus manos.", timer: 60 },
+      { id: 198, level: 3, target: "Andrés", text: "Pon a Ariana frente a un espejo (o mírense hacia abajo viendo cómo entras y sales de ella) mientras le hablas al oído y le tocas el pecho durante 60 segundos.", timer: 60 },
+      { id: 199, level: 3, target: "Ariana", text: "Mientras Andrés está dentro de ti en tu pose favorita, háblale sucio al oído diciéndole exactamente qué sientes y qué tan duro o profundo lo quieres durante 60 segundos.", timer: 60 },
+      { id: 200, level: 3, target: "Ambos", text: "Reto de 3 velocidades: En la pose que elijan, hagan 20 segundos en cámara lenta, 20 segundos a ritmo normal y 20 segundos al máximo de velocidad y fuerza.", timer: 60 },
+      { id: 201, level: 3, target: "Andrés", text: "Alterna entre darle sexo oral a Ariana por 20 segundos y subir a penetrarla con fuerza otros 40 segundos sin descanso.", timer: 60 },
+      { id: 202, level: 3, target: "Ariana", text: "Alterna entre darle sexo oral a Andrés por 20 segundos y subirte a montarlo otros 40 segundos sin descanso.", timer: 60 },
+      { id: 203, level: 3, target: "Andrés", text: "Por los próximos 60 segundos tú tienes el mando absoluto: pon a Ariana en la posición que más te encante verla y hazlo a tu ritmo.", timer: 60 },
+      { id: 204, level: 3, target: "Ariana", text: "Por los próximos 60 segundos tú mandas: pon a Andrés como quieras y haz que repita el movimiento que más rico te ha hecho sentir hoy.", timer: 60 },
+      { id: 205, level: 3, target: "Ambos", text: "Cambio de rol en vivo: Empiecen 30 segundos con Ariana arriba dominando y, a la mitad del minuto, Andrés la gira sobre la cama sin salirse quedando él arriba otros 30 segundos.", timer: 60 },
+      { id: 206, level: 3, target: "Ambos", text: "Prohibido callarse: Durante los próximos 60 segundos ninguno de los dos puede reprimir un solo gemido, suspiro ni palabra al oído.", timer: 60 },
+      { id: 207, level: 3, target: "Andrés", text: "Dedica 90 segundos continuos combinando penetración, besos y tu mano en su clítoris para llevar a Ariana directo al orgasmo.", timer: 90 },
+      { id: 208, level: 3, target: "Ariana", text: "Dedica 90 segundos continuos en la posición que más encienda a Andrés moviéndote sin parar para llevarlo al límite.", timer: 90 },
+      { id: 209, level: 3, target: "Ambos", text: "Penúltima Carta: Quien tenga menos tragos acumulados en el marcador elige la posición final y el lugar del cuerpo donde quieren terminar esta noche." },
+      { id: 210, level: 3, target: "Ambos", text: "Carta #210 · Final Sin Límite: Dejen el celular a un lado, abrácense piel con piel en su pose elegida y no se detengan hasta que ambos terminen." }
+    ];
+
+    let deck = [];
+    let currentCard = null;
+    let isFlipped = false;
+    let currentFilter = 'ALL';
+    let drinks = { 'Ariana': 0, 'Andrés': 0 };
+    let activePlayer = 'Ariana';
+    let timerInterval = null;
+
+    function shuffle(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function buildLevel1Deck() {
+      // Carta 1 siempre primera, 2-89 al azar, carta 90 siempre última
+      const firstCard = ALL_CARDS.find(c => c.id === 1);
+      const middleCards = shuffle(ALL_CARDS.filter(c => c.id >= 2 && c.id <= 89));
+      const lastCard = ALL_CARDS.find(c => c.id === 90);
+      return [firstCard, ...middleCards, lastCard];
+    }
+
+    function buildLevel2Deck() {
+      // Orden progresivo estricto 91 a 120
+      return ALL_CARDS.filter(c => c.level === 2);
+    }
+
+    function buildLevel3Deck() {
+      // Orden progresivo estricto 121 a 210
+      return ALL_CARDS.filter(c => c.level === 3);
+    }
+
+    function buildDeck() {
+      if (currentFilter === 'ALL') {
+        deck = [...buildLevel1Deck(), ...buildLevel2Deck(), ...buildLevel3Deck()];
+      } else if (currentFilter === 1) {
+        deck = buildLevel1Deck();
+      } else if (currentFilter === 2) {
+        deck = buildLevel2Deck();
+      } else if (currentFilter === 3) {
+        deck = buildLevel3Deck();
+      }
+      updateProgress();
+      updateSkipButton(currentFilter === 'ALL' ? 1 : currentFilter);
+    }
+
+    function updateSkipButton(lvl) {
+      const skipBtn = document.getElementById('skipLevelBtn');
+      if (lvl === 1) {
+        skipBtn.style.display = 'block';
+        skipBtn.textContent = '⏭️ Pasar al Nivel 2 - 🥵';
+      } else if (lvl === 2) {
+        skipBtn.style.display = 'block';
+        skipBtn.textContent = '⏭️ Pasar al Nivel 3 - 😈🔥';
+      } else {
+        skipBtn.style.display = 'none';
+      }
+    }
+
+    function setActiveChip(id) {
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      const chip = document.getElementById(id);
+      if (chip) chip.classList.add('active');
+    }
+
+    function skipToNextLevel() {
+      const curLvl = currentCard ? currentCard.level : (currentFilter === 'ALL' ? 1 : currentFilter);
+      if (curLvl === 1) {
+        if (!confirm('¿Saltar el resto del Nivel 1 - 😆 y pasar directo al Nivel 2 - 🥵?')) return;
+        goToLevel(2);
+      } else if (curLvl === 2) {
+        if (!confirm('¿Saltar el resto del Nivel 2 - 🥵 y pasar directo al Nivel 3 - 😈🔥?')) return;
+        goToLevel(3);
+      }
+    }
+
+    function goToLevel(lvl) {
+      stopTimer();
+      if (currentFilter === 'ALL') {
+        deck = lvl === 2
+          ? [...buildLevel2Deck(), ...buildLevel3Deck()]
+          : buildLevel3Deck();
+      } else {
+        currentFilter = lvl;
+        setActiveChip('chip-' + lvl);
+        deck = lvl === 2 ? buildLevel2Deck() : buildLevel3Deck();
+      }
+      updateSkipButton(lvl);
+      updateProgress();
+      nextCard();
+    }
+
+    function setFilter(f, el) {
+      stopTimer();
+      currentFilter = f;
+      setActiveChip(el ? el.id : 'chip-' + f);
+      currentCard = null;
+      unflipCard();
+      document.getElementById('cardText').textContent = 'Toquen la carta o el botón de abajo para sacar la primera carta.';
+      document.getElementById('timerBtn').style.display = 'none';
+      buildDeck();
+      updatePenaltyButton(null);
+      setActivePlayer('Ariana');
+    }
+
+    function updateProgress() {
+      document.getElementById('progressInfo').textContent = 'Cartas restantes: ' + deck.length;
+    }
+
+    function unflipCard() {
+      document.getElementById('cardElement').classList.remove('is-flipped');
+      isFlipped = false;
+    }
+
+    // ---------- Turnos y marcador ----------
+    function setActivePlayer(target) {
+      const boxA = document.getElementById('box-Ariana');
+      const boxB = document.getElementById('box-Andrés');
+      boxA.classList.remove('active-turn');
+      boxB.classList.remove('active-turn');
+      if (target === 'Ambos') {
+        boxA.classList.add('active-turn');
+        boxB.classList.add('active-turn');
+      } else if (target === 'Ariana') {
+        boxA.classList.add('active-turn');
+        activePlayer = 'Ariana';
+      } else if (target === 'Andrés') {
+        boxB.classList.add('active-turn');
+        activePlayer = 'Andrés';
+      }
+    }
+
+    function addDrink(player, n) {
+      drinks[player] = Math.max(0, drinks[player] + n);
+      document.getElementById('drinks-' + player).textContent = drinks[player];
+    }
+
+    const wildcards = { 'Ariana': false, 'Andrés': false };
+
+    function toggleWildcard(player) {
+      const badge = document.getElementById('wc-' + player);
+      if (!wildcards[player]) {
+        if (!confirm('¿' + player + ' usa su Comodín ★ para obligar al otro a cumplir la carta sin poder negarse?')) return;
+        wildcards[player] = true;
+      } else {
+        if (!confirm('¿Devolverle el Comodín ★ a ' + player + '?')) return;
+        wildcards[player] = false;
+      }
+      badge.classList.toggle('used', wildcards[player]);
+    }
+
+    // ---------- Cartas ----------
+    function nextCard() {
+      stopTimer();
+      const card = deck.shift();
+      if (!card) {
+        showEnd();
+        return;
+      }
+      presentCard(card);
+    }
+
+    function presentCard(card) {
+      stopTimer();
+      const el = document.getElementById('cardElement');
+      const delay = isFlipped ? 350 : 0;
+      if (isFlipped) {
+        el.classList.remove('is-flipped');
+        isFlipped = false;
+      }
+      currentCard = card;
+      updateProgress();
+      updateSkipButton(card.level);
+      setTimeout(() => {
+        if (currentCard !== card) return; // llegó otra carta mientras tanto
+        renderCard(card);
+        el.classList.add('is-flipped');
+        isFlipped = true;
+      }, delay);
+    }
+
+    function renderCard(card) {
+      const lvl = LEVELS[card.level];
+      document.getElementById('cardFront').style.setProperty('--cat-color', lvl.color);
+      document.getElementById('catName').textContent = lvl.name;
+      document.getElementById('cardIndex').textContent = card.end ? '🎉' : '#' + card.id + '/210';
+      document.getElementById('cardTarget').textContent = card.target === 'Ambos' ? '👥 Ambos' : '👉 ' + card.target;
+      document.getElementById('cardText').textContent = card.text;
+      document.getElementById('penaltyHint').textContent = card.end ? '' : lvl.penalty;
+
+      const tBtn = document.getElementById('timerBtn');
+      if (card.timer) {
+        tBtn.style.display = 'inline-block';
+        tBtn.textContent = '⏱️ ' + card.timer + 's';
+      } else {
+        tBtn.style.display = 'none';
+      }
+
+      updatePenaltyButton(card);
+      setActivePlayer(card.target);
+    }
+
+    function updatePenaltyButton(card) {
+      const btn = document.getElementById('penaltyActionBtn');
+      if (!card || card.end) {
+        btn.textContent = '🍻 Tomé (+1)';
+        return;
+      }
+      const both = card.target === 'Ambos';
+      if (card.level === 1) btn.textContent = both ? '🍻 Tomamos (+1 c/u)' : '🍻 Tomé (+1)';
+      else if (card.level === 2) btn.textContent = both ? '🥃 Nos negamos (+1 c/u)' : '🥃 Me niego (+1)';
+      else btn.textContent = both ? '😈 Nos negamos (castigo)' : '😈 Me niego (castigo)';
+    }
+
+    function showEnd() {
+      const card = {
+        id: 'FIN', level: 3, target: 'Ambos', end: true,
+        text: '¡Se acabó el mazo! 🎉 Gracias por jugar, Ariana y Andrés. Toquen 🔄 arriba para volver a empezar con las cartas mezcladas.'
+      };
+      presentCard(card);
+      document.getElementById('skipLevelBtn').style.display = 'none';
+    }
+
+    function handleCardTap() {
+      if (!currentCard) {
+        nextCard();
+      } else if (!isFlipped) {
+        renderCard(currentCard);
+        document.getElementById('cardElement').classList.add('is-flipped');
+        isFlipped = true;
+      }
+    }
+
+    function jumpToCard() {
+      const value = prompt('¿A qué número de carta quieres ir? (1 - 210)');
+      if (value === null) return;
+      const num = parseInt(value, 10);
+      const card = ALL_CARDS.find(c => c.id === num);
+      if (!card) {
+        alert('Ese número no existe. Elige entre 1 y 210.');
+        return;
+      }
+      deck = deck.filter(c => c.id !== card.id);
+      presentCard(card);
+    }
+
+    // ---------- Castigos ----------
+    function handlePenalty() {
+      if (!currentCard || currentCard.end) return;
+      const targets = currentCard.target === 'Ambos' ? ['Ariana', 'Andrés'] : [currentCard.target];
+      targets.forEach(p => addDrink(p, 1));
+      if (currentCard.level === 3) showPunishment();
+    }
+
+    let lastPunishment = -1;
+
+    function showPunishment() {
+      let i;
+      do {
+        i = Math.floor(Math.random() * EXTRA_PUNISHMENTS_L3.length);
+      } while (i === lastPunishment && EXTRA_PUNISHMENTS_L3.length > 1);
+      lastPunishment = i;
+      document.getElementById('punishText').textContent = EXTRA_PUNISHMENTS_L3[i];
+      document.getElementById('punishModal').classList.add('open');
+    }
+
+    function closePunishModal() {
+      document.getElementById('punishModal').classList.remove('open');
+    }
+
+    function acceptPunishment() {
+      closePunishModal();
+      nextCard();
+    }
+
+    // ---------- Temporizador ----------
+    function stopTimer() {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+    }
+
+    function beep() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        osc.frequency.value = 880;
+        osc.connect(ctx.destination);
+        osc.start();
+        setTimeout(() => { osc.stop(); ctx.close(); }, 400);
+      } catch (e) { /* sin audio */ }
+      if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+    }
+
+    function startTimer(e) {
+      e.stopPropagation();
+      if (!currentCard || !currentCard.timer) return;
+      const btn = document.getElementById('timerBtn');
+
+      // Si ya está corriendo, un segundo toque lo detiene y lo reinicia
+      if (timerInterval) {
+        stopTimer();
+        btn.textContent = '⏱️ ' + currentCard.timer + 's';
+        return;
+      }
+
+      let left = currentCard.timer;
+      btn.textContent = '⏳ ' + left + 's';
+      timerInterval = setInterval(() => {
+        left--;
+        if (left > 0) {
+          btn.textContent = '⏳ ' + left + 's';
+        } else {
+          stopTimer();
+          btn.textContent = '✅ ¡Tiempo!';
+          beep();
+        }
+      }, 1000);
+    }
+
+    // ---------- Modales y reinicio ----------
+    function openModal() {
+      document.getElementById('rulesModal').classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('rulesModal').classList.remove('open');
+    }
+
+    function resetGame() {
+      if (!confirm('¿Reiniciar la partida? Se borran los tragos, los comodines y se vuelve a mezclar el mazo.')) return;
+      stopTimer();
+      drinks = { 'Ariana': 0, 'Andrés': 0 };
+      document.getElementById('drinks-Ariana').textContent = 0;
+      document.getElementById('drinks-Andrés').textContent = 0;
+      wildcards['Ariana'] = false;
+      wildcards['Andrés'] = false;
+      document.getElementById('wc-Ariana').classList.remove('used');
+      document.getElementById('wc-Andrés').classList.remove('used');
+      currentCard = null;
+      unflipCard();
+      document.getElementById('timerBtn').style.display = 'none';
+      document.getElementById('cardText').textContent = '¡Bienvenidos! Toquen la carta o el botón de abajo para sacar la primera carta.';
+      buildDeck();
+      updatePenaltyButton(null);
+      setActivePlayer('Ariana');
+    }
+
+    // ---------- Inicio ----------
+    buildDeck();
+    setActivePlayer('Ariana');
+  </script>
+</body>
+</html>
